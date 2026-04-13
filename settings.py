@@ -18,13 +18,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 AUTH_USER_MODEL = 'accounts.User'
 
-# Secret key from environment variable — fallback for local dev only
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-d21k(luuvqwtli&)f3zi-*p7*w07_omgzn=)q8n-!odh_tb)yd')
 
-# Debug off in production
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = False
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'lancr-production.up.railway.app',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://lancr-production.up.railway.app',
+]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -106,3 +113,4 @@ APPEND_SLASH = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
