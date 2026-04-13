@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Lancr | Find Skilled Tradespeople Worldwide{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="relative overflow-hidden">
+  <div class="max-w-5xl mx-auto px-6 py-24 text-center">
+
+    <span class="inline-block text-teal-400 text-sm font-semibold tracking-widest uppercase mb-4">
+      The Trades Marketplace
+    </span>
+
+    <h1 class="text-5xl font-black text-white leading-tight mb-6">
+      Find trusted tradespeople.<br>
+      <span class="lancr-teal">Get hired faster.</span>
+    </h1>
+
+    <p class="text-gray-400 text-lg max-w-xl mx-auto mb-10">
+      Lancr connects clients with skilled tradespeople worldwide —
+      plumbers, electricians, carpenters and more. Post a job or find your next project today.
+    </p>
+
+    <div class="flex justify-center gap-4 flex-wrap">
+      {% if user.is_authenticated %}
+        {% if user.profile.role == 'client' %}
+          <a href="{% url 'job_list' %}" class="btn-primary text-base px-8 py-3">
+            + Post a Job
+          </a>
+          <a href="{% url 'job_list' %}" class="btn-secondary text-base px-8 py-3">
+            Browse Jobs
+          </a>
+        {% else %}
+          <a href="{% url 'job_list' %}" class="btn-primary text-base px-8 py-3">
+            Find Work
+          </a>
+          <a href="{% url 'client_dashboard' %}" class="btn-secondary text-base px-8 py-3">
+            My Dashboard
+          </a>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'register' %}" class="btn-primary text-base px-8 py-3">
+          Get Started Free
+        </a>
+        <a href="{% url 'job_list' %}" class="btn-secondary text-base px-8 py-3">
+          Browse Jobs
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Subtle background grid -->
+  <div class="absolute inset-0 -z-10 opacity-5"
+       style="background-image: linear-gradient(#00e5b0 1px, transparent 1px),
+              linear-gradient(90deg, #00e5b0 1px, transparent 1px);
+              background-size: 40px 40px;">
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="border-t border-b border-subtle py-12">
+  <div class="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-6 text-center">
+    <div>
+      <p class="text-4xl font-black lancr-teal">{{ total_jobs }}</p>
+      <p class="text-gray-400 text-sm mt-1">Jobs Posted</p>
+    </div>
+    <div>
+      <p class="text-4xl font-black lancr-teal">{{ total_freelancers }}</p>
+      <p class="text-gray-400 text-sm mt-1">Tradespeople Registered</p>
+    </div>
+    <div>
+      <p class="text-4xl font-black lancr-teal">{{ total_hired }}</p>
+      <p class="text-gray-400 text-sm mt-1">Jobs Completed</p>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="max-w-5xl mx-auto px-6 py-20">
+  <h2 class="text-3xl font-bold text-white text-center mb-12">How Lancr Works</h2>
+
+  <div class="grid md:grid-cols-3 gap-8">
+
+    <div class="bg-card border border-subtle rounded-2xl p-6 text-center">
+      <div class="w-12 h-12 rounded-full bg-teal-900/40 flex items-center justify-center
+                  text-teal-400 text-xl font-black mx-auto mb-4">1</div>
+      <h3 class="text-white font-semibold text-lg mb-2">Post a Job</h3>
+      <p class="text-gray-400 text-sm leading-relaxed">
+        Describe what you need, set your budget, and upload photos
+        so tradespeople understand the work required.
+      </p>
+    </div>
+
+    <div class="bg-card border border-subtle rounded-2xl p-6 text-center">
+      <div class="w-12 h-12 rounded-full bg-teal-900/40 flex items-center justify-center
+                  text-teal-400 text-xl font-black mx-auto mb-4">2</div>
+      <h3 class="text-white font-semibold text-lg mb-2">Review Applications</h3>
+      <p class="text-gray-400 text-sm leading-relaxed">
+        Skilled tradespeople apply with a cover letter. Review their
+        profiles and pick the best fit for your job.
+      </p>
+    </div>
+
+    <div class="bg-card border border-subtle rounded-2xl p-6 text-center">
+      <div class="w-12 h-12 rounded-full bg-teal-900/40 flex items-center justify-center
+                  text-teal-400 text-xl font-black mx-auto mb-4">3</div>
+      <h3 class="text-white font-semibold text-lg mb-2">Get it Done</h3>
+      <p class="text-gray-400 text-sm leading-relaxed">
+        Accept an application, chat directly with your tradesperson,
+        and get the job completed on your terms.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA banner -->
+{% if not user.is_authenticated %}
+<section class="bg-card border-t border-subtle py-16 text-center px-6">
+  <h2 class="text-3xl font-bold text-white mb-3">Ready to get started?</h2>
+  <p class="text-gray-400 mb-8">Join Lancr today — free to sign up, anywhere in the world.</p>
+  <div class="flex justify-center gap-4">
+    <a href="{% url 'register' %}" class="btn-primary px-8 py-3 text-base">Create an Account</a>
+    <a href="{% url 'login' %}" class="btn-secondary px-8 py-3 text-base">Login</a>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load currency_tags %}
+
+{% block title %}Freelancer Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-12 px-6">
+
+  <h1 class="text-2xl font-bold text-white mb-8">Freelancer Dashboard</h1>
+
+  <!-- ACTIVE JOBS -->
+  <h2 class="text-xl font-semibold text-white mb-4">Active Jobs</h2>
+
+  {% if active_jobs %}
+  <div class="space-y-4 mb-12">
+    {% for job in active_jobs %}
+    <div class="bg-card border border-subtle rounded-xl p-6">
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="text-lg font-semibold text-white">{{ job.title }}</h3>
+        <span class="badge-in_progress">In Progress</span>
+      </div>
+      <p class="text-gray-400 text-sm">
+        Client:
+        <a href="{% url 'profile_view' job.client.username %}"
+           class="hover:text-teal-400 transition">{{ job.client.username }}</a>
+      </p>
+      <p class="text-gray-500 text-xs mt-1">
+        Budget: {{ job.currency|currency_symbol }}{{ job.budget }}
+      </p>
+      <div class="mt-4 pt-4 border-t border-subtle flex flex-wrap gap-3">
+        <a href="{% url 'job_chat' job.id %}" class="btn-primary text-sm">💬 Open Chat</a>
+        <a href="{% url 'profile_view' job.client.username %}" class="btn-secondary text-sm">
+          ⭐ Leave a Review
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <p class="text-gray-500 mb-12">You have no active jobs yet.</p>
+  {% endif %}
+
+  <!-- APPLICATIONS -->
+  <h2 class="text-xl font-semibold text-white mb-4">My Applications</h2>
+
+  {% if applications %}
+  <div class="space-y-4">
+    {% for app in applications %}
+    <div class="bg-card border border-subtle rounded-xl p-6">
+
+      <div class="flex justify-between items-center mb-2">
+        <a href="{% url 'job_detail' app.job.id %}"
+           class="text-lg font-semibold text-white hover:text-teal-400 transition">
+          {{ app.job.title }}
+        </a>
+        {% if app.status == "accepted" %}
+          <span class="badge-open">✔ Accepted</span>
+        {% elif app.status == "rejected" %}
+          <span class="badge-closed">✘ Rejected</span>
+        {% else %}
+          <span class="badge-in_progress">Pending</span>
+        {% endif %}
+      </div>
+
+      <p class="text-gray-400 text-sm">
+        Client:
+        <a href="{% url 'profile_view' app.job.client.username %}"
+           class="hover:text-teal-400 transition">{{ app.job.client.username }}</a>
+      </p>
+      <p class="text-gray-500 text-xs mt-1">
+        Budget: {{ app.job.currency|currency_symbol }}{{ app.job.budget }}
+      </p>
+      <p class="text-gray-500 text-xs mt-1">Applied {{ app.applied_at|date:"M d, Y" }}</p>
+
+      {% if app.status == "accepted" %}
+      <div class="mt-4 pt-4 border-t border-subtle flex flex-wrap gap-3">
+        <a href="{% url 'job_chat' app.job.id %}" class="btn-primary text-sm">
+          💬 Open Chat with {{ app.job.client.username }}
+        </a>
+        <a href="{% url 'profile_view' app.job.client.username %}" class="btn-secondary text-sm">
+          ⭐ Leave a Review
+        </a>
+      </div>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <p class="text-gray-500">You haven't applied to any jobs yet.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

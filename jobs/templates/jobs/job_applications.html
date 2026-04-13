@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Applications | {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-6">
+
+  <a href="{% url 'job_detail' job.id %}" class="text-gray-500 hover:text-teal-400 text-sm mb-6 inline-block">
+    ← Back to Job
+  </a>
+
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-white">
+      Applications for "{{ job.title }}"
+    </h1>
+    <span class="badge-{{ job.status }}">{{ job.get_status_display }}</span>
+  </div>
+
+  {% if applications %}
+    <div class="space-y-6">
+      {% for app in applications %}
+        <div class="bg-card border border-subtle rounded-2xl p-6">
+
+          <!-- Header row -->
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <!-- Clickable freelancer name -->
+              <a href="{% url 'profile_view' app.freelancer.username %}"
+                 class="text-lg font-semibold text-white hover:text-teal-400 transition">
+                {{ app.freelancer.username }}
+              </a>
+              <p class="text-gray-500 text-sm">Applied {{ app.applied_at|date:"M d, Y" }}</p>
+            </div>
+
+            <!-- Per-application status + action -->
+            {% if app.status == "accepted" %}
+              <span class="badge-open">✔ Accepted</span>
+
+            {% elif app.status == "rejected" %}
+              <span class="badge-closed">✘ Rejected</span>
+
+            {% elif job.status == "open" %}
+              <form method="post" action="{% url 'hire_freelancer' app.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary text-sm">
+                  Accept Application
+                </button>
+              </form>
+
+            {% else %}
+              <span class="badge-in_progress">Not Selected</span>
+            {% endif %}
+
+          </div>
+
+          <!-- Cover letter -->
+          {% if app.cover_letter %}
+            <p class="text-gray-400 whitespace-pre-line text-sm leading-relaxed">
+              {{ app.cover_letter }}
+            </p>
+          {% else %}
+            <p class="text-gray-600 text-sm italic">No cover letter provided.</p>
+          {% endif %}
+
+          <!-- Actions if accepted -->
+          {% if app.status == "accepted" %}
+            <div class="mt-4 pt-4 border-t border-subtle flex flex-wrap gap-3">
+              <a href="{% url 'job_chat' job.id %}" class="btn-secondary text-sm">
+                💬 Open Chat with {{ app.freelancer.username }}
+              </a>
+              <a href="{% url 'profile_view' app.freelancer.username %}"
+                 class="btn-secondary text-sm">
+                ⭐ View Profile & Leave Review
+              </a>
+            </div>
+          {% endif %}
+
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="bg-card border border-subtle rounded-2xl p-6 text-center">
+      <p class="text-gray-500">No applications yet.</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

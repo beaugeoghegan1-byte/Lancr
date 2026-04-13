@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Post a Job</title>
+    <link rel="stylesheet" href="{% static 'my_app/style.css' %}">
+</head>
+<body>
+
+<div class="container">
+    <div class="form-card">
+        <h1>Post a New Job</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <label>Job Title</label>
+            {{ form.title }}
+
+            <label>Description</label>
+            {{ form.description }}
+
+            <label>Budget ($)</label>
+            {{ form.budget }}
+
+            <label>Category</label>
+            {{ form.category }}
+
+            <label>Location</label>
+            {{ form.location }}
+
+            <div class="checkbox-field">
+                {{ form.remote }} <span>Remote Job</span>
+            </div>
+
+            <button type="submit" class="btn-primary">Post Job</button>
+        </form>
+
+        <a href="{% url 'job_list' %}" class="back-link">← Back to Jobs</a>
+    </div>
+</div>
+
+</body>
+</html>

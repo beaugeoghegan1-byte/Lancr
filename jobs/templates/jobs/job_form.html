@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Post Job | Lancr{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-12 px-6">
+
+<h1 class="text-2xl font-bold text-white mb-6">
+Post a New Job
+</h1>
+
+<form method="post" class="bg-card border border-subtle p-6 rounded-2xl space-y-4">
+
+{% csrf_token %}
+
+<div>
+<label class="text-sm text-gray-400">Title</label>
+{{ form.title }}
+</div>
+
+<div>
+<label class="text-sm text-gray-400">Description</label>
+{{ form.description }}
+</div>
+
+<div>
+<label class="text-sm text-gray-400">Category</label>
+{{ form.category }}
+</div>
+
+<div>
+<label class="text-sm text-gray-400">Budget ($)</label>
+{{ form.budget }}
+</div>
+
+<div class="flex items-center gap-2">
+{{ form.remote }}
+<label class="text-sm text-gray-400">Remote job</label>
+</div>
+
+<div>
+<label class="text-sm text-gray-400">Location</label>
+{{ form.location }}
+</div>
+
+<button type="submit" class="btn-primary">
+Post Job
+</button>
+
+</form>
+
+</div>
+{% endblock %}
+

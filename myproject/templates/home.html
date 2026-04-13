@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Available Jobs{% endblock %}
+
+{% block content %}
+    <h1 style="color: #00ffcc; margin-bottom: 20px;">Available Jobs</h1>
+    <div class="job-list" style="
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    ">
+        {% for job in jobs %}
+            <div class="job-card" style="
+                background-color: #1e1e1e;
+                border: 1px solid #333;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
+                transition: transform 0.2s ease;
+            ">
+                <h2 style="color: #00ffcc;">{{ job.title }}</h2>
+                <p>{{ job.description|truncatewords:20 }}</p>
+                <p class="job-meta">Category: {{ job.get_category_display }}</p>
+                <p class="job-meta">Client: {{ job.client.username }}</p>
+                <p class="job-meta">Status: {{ job.get_status_display }}</p>
+                <p class="job-meta">Posted: {{ job.created_at|date:"M d, Y" }}</p>
+            </div>
+        {% empty %}
+            <p class="no-jobs">No jobs available.</p>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+
+
+

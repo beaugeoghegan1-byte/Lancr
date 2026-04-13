@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Lancr | Available Jobs{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold text-white">Available Jobs</h1>
+    {% if user.is_authenticated and user.profile.role == 'client' %}
+      <button onclick="document.getElementById('postJobForm').classList.toggle('hidden')"
+              class="btn-primary">
+        + Post a Job
+      </button>
+    {% endif %}
+  </div>
+
+  <!-- Search & Filter -->
+  <form method="get" class="bg-card border border-subtle rounded-2xl p-4 mb-6">
+    <div class="grid md:grid-cols-5 gap-3">
+      <input
+        type="text"
+        name="q"
+        value="{{ request.GET.q }}"
+        placeholder="Search jobs..."
+        class="input-dark md:col-span-2"
+      >
+      <input
+        type="text"
+        name="location"
+        value="{{ request.GET.location }}"
+        placeholder="Location..."
+        class="input-dark"
+      >
+      <select name="category" class="input-dark">
+        <option value="">All Categories</option>
+        {% for value, label in categories %}
+          <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-primary">Search</button>
+    </div>
+
+    <!-- Second row: remote + active filter tags -->
+    <div class="flex items-center gap-4 mt-3 flex-wrap">
+      <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+        <input
+          type="checkbox"
+          name="remote"
+          value="true"
+          {% if request.GET.remote %}checked{% endif %}
+          class="accent-teal-400"
+        >
+        Remote Only
+      </label>
+
+      {% if request.GET.q or request.GET.category or request.GET.remote or request.GET.location %}
+        <div class="flex items-center gap-2 flex-wrap ml-auto">
+          <span class="text-gray-500 text-xs">Active filters:</span>
+
+          {% if request.GET.q %}
+            <span class="bg-teal-900/40 text-teal-300 text-xs px-3 py-1 rounded-full border border-teal-700">
+              "{{ request.GET.q }}"
+            </span>
+          {% endif %}
+
+          {% if request.GET.location %}
+            <span class="bg-teal-900/40 text-teal-300 text-xs px-3 py-1 rounded-full border border-teal-700">
+              📍 {{ request.GET.location }}
+            </span>
+          {% endif %}
+
+          {% if request.GET.category %}
+            <span class="bg-teal-900/40 text-teal-300 text-xs px-3 py-1 rounded-full border border-teal-700">
+              {{ request.GET.category|capfirst }}
+            </span>
+          {% endif %}
+
+          {% if request.GET.remote %}
+            <span class="bg-teal-900/40 text-teal-300 text-xs px-3 py-1 rounded-full border border-teal-700">
+              Remote
+            </span>
+          {% endif %}
+
+          <a href="{% url 'job_list' %}" class="text-xs text-red-400 hover:text-red-300 hover:underline">
+            Clear all
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Result count -->
+  {% if request.GET.q or request.GET.category or request.GET.remote or request.GET.location %}
+    <p class="text-gray-500 text-sm mb-4">
+      {{ jobs|length }} result{{ jobs|length|pluralize }} found
+    </p>
+  {% endif %}
+
+  <!-- Post Job Form (clients only) -->
+  {% if user.is_authenticated and user.profile.role == 'client' %}
+  <div id="postJobForm" class="hidden bg-card border border-subtle rounded-2xl p-6 mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4">Post a New Job</h2>
+    <form
+      hx-post="{% url 'job_create' %}"
+      hx-target="#jobItems"
+      hx-swap="afterbegin"
+      hx-indicator="#loadingIndicator"
+      hx-encoding="multipart/form-data"
+      class="space-y-4"
+    >
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-gray-400 text-sm mb-1">Job Title</label>
+        <input type="text" name="title" placeholder="e.g., Fix leaking roof"
+               required class="input-dark">
+      </div>
+
+      <div>
+        <label class="block text-gray-400 text-sm mb-1">Description</label>
+        <textarea name="description" placeholder="Describe the job..." required
+                  class="input-dark h-24 resize-none"></textarea>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-gray-400 text-sm mb-1">Category</label>
+          <select name="category" class="input-dark">
+            <option value="construction">Construction</option>
+            <option value="plumbing">Plumbing</option>
+            <option value="electrical">Electrical</option>
+            <option value="carpentry">Carpentry</option>
+            <option value="painting">Painting & Decorating</option>
+            <option value="landscaping">Landscaping</option>
+            <option value="cleaning">Cleaning</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-gray-400 text-sm mb-1">Budget</label>
+          <div class="flex gap-2">
+            <select name="currency" class="input-dark w-28 shrink-0">
+              <option value="EUR">€ EUR</option>
+              <option value="USD">$ USD</option>
+              <option value="GBP">£ GBP</option>
+              <option value="CAD">CA$ CAD</option>
+              <option value="AUD">AU$ AUD</option>
+            </select>
+            <input type="number" name="budget" placeholder="500" min="0"
+                   required class="input-dark">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <label class="flex items-center gap-2 text-gray-400 text-sm cursor-pointer">
+          <input type="checkbox" name="remote" class="rounded accent-teal-400"> Remote
+        </label>
+        <input type="text" name="location" placeholder="Location (if not remote)"
+               class="input-dark flex-1">
+      </div>
+
+      <div>
+        <label class="block text-gray-400 text-sm mb-1">
+          Job Photos
+          <span class="text-gray-600">(optional — helps tradespeople understand the work)</span>
+        </label>
+        <input type="file" name="images" accept="image/*" multiple
+               class="input-dark text-gray-400 cursor-pointer">
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button type="submit" class="btn-primary">Post Job</button>
+        <span id="loadingIndicator" class="htmx-indicator text-sm text-teal-400">Posting...</span>
+      </div>
+    </form>
+  </div>
+
+  {% elif not user.is_authenticated %}
+  <p class="text-gray-500 mb-6 text-sm">
+    <a href="{% url 'login' %}" class="text-teal-400 hover:underline">Login</a>
+    to post or apply to jobs.
+  </p>
+  {% endif %}
+
+  <!-- Job List -->
+  <ul id="jobItems" class="space-y-4">
+    {% for job in jobs %}
+      {% include "jobs/_job_card.html" %}
+    {% empty %}
+      <li class="bg-card border border-subtle rounded-2xl p-12 text-center">
+        {% if request.GET.q or request.GET.category or request.GET.remote or request.GET.location %}
+          <p class="text-gray-400 font-medium">No jobs match your search.</p>
+          <a href="{% url 'job_list' %}" class="text-teal-400 text-sm hover:underline mt-2 inline-block">
+            Clear filters
+          </a>
+        {% else %}
+          <p class="text-gray-500">No jobs available right now.</p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+
+</div>
+{% endblock %}

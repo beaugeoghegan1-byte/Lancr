@@ -1,0 +1,158 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}{{ viewed_user.username }} | Lancr{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-12 px-6">
+
+  <div class="bg-card border border-subtle rounded-2xl p-8 mb-6">
+    <div class="flex items-center gap-6">
+
+      {% if profile.avatar %}
+        <img src="{{ profile.avatar.url }}" alt="{{ viewed_user.username }}"
+             class="w-20 h-20 rounded-full object-cover border-2 border-subtle">
+      {% else %}
+        <div class="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center
+                    text-2xl font-bold text-teal-400 border-2 border-subtle">
+          {{ viewed_user.username|first|upper }}
+        </div>
+      {% endif %}
+
+      <div class="flex-1">
+        <h1 class="text-2xl font-bold text-white">{{ viewed_user.username }}</h1>
+        <span class="badge-{% if profile.role == 'client' %}open{% else %}in_progress{% endif %} mt-1 inline-block">
+          {{ profile.get_role_display }}
+        </span>
+
+        <!-- Average rating -->
+        {% if avg_rating %}
+        <div class="flex items-center gap-2 mt-2">
+          <div class="flex gap-0.5">
+            {% for i in "12345" %}
+              {% if forloop.counter <= avg_rating %}
+                <span class="text-yellow-400 text-lg">★</span>
+              {% else %}
+                <span class="text-gray-600 text-lg">★</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <span class="text-gray-400 text-sm">
+            {{ avg_rating|floatformat:1 }} · {{ reviews|length }} review{{ reviews|length|pluralize }}
+          </span>
+        </div>
+        {% else %}
+          <p class="text-gray-600 text-sm mt-2">No reviews yet</p>
+        {% endif %}
+      </div>
+
+      {% if request.user == viewed_user %}
+      <a href="{% url 'profile_edit' %}" class="btn-secondary text-sm">Edit Profile</a>
+      {% endif %}
+    </div>
+
+    {% if profile.bio %}
+    <div class="mt-6 pt-6 border-t border-subtle">
+      <h2 class="text-gray-400 text-sm font-semibold uppercase tracking-wide mb-2">About</h2>
+      <p class="text-gray-300 leading-relaxed">{{ profile.bio }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Posted jobs (clients only) -->
+  {% if posted_jobs %}
+  <h2 class="text-lg font-semibold text-white mb-4">Open Jobs by {{ viewed_user.username }}</h2>
+  <div class="space-y-4 mb-8">
+    {% for job in posted_jobs %}
+    <div class="bg-card border border-subtle rounded-xl p-5">
+      <div class="flex justify-between items-center">
+        <a href="{% url 'job_detail' job.id %}"
+           class="text-white font-medium hover:text-teal-400 transition">
+          {{ job.title }}
+        </a>
+        <span class="badge-open">Open</span>
+      </div>
+      <p class="text-gray-500 text-sm mt-1">
+        {{ job.get_category_display }} · ${{ job.budget }}
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Leave a review -->
+  {% if reviewable_jobs %}
+  <div class="bg-card border border-subtle rounded-2xl p-6 mb-6">
+    <h2 class="text-lg font-semibold text-white mb-4">
+      Leave a Review for {{ viewed_user.username }}
+    </h2>
+    <form method="post" action="{% url 'leave_review' viewed_user.username %}"
+          class="space-y-4">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-gray-400 text-sm mb-1">Job</label>
+        <select name="job_id" class="input-dark">
+          {% for job in reviewable_jobs %}
+            <option value="{{ job.id }}">{{ job.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-gray-400 text-sm mb-2">Rating</label>
+        <div class="flex gap-2">
+          {% for i in "12345" %}
+          <label class="cursor-pointer">
+            <input type="radio" name="rating" value="{{ forloop.counter }}"
+                   class="sr-only peer" required>
+            <span class="text-3xl text-gray-600 peer-checked:text-yellow-400
+                         hover:text-yellow-300 transition select-none">★</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Submit Review</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Reviews received -->
+  {% if reviews %}
+  <h2 class="text-lg font-semibold text-white mb-4">
+    Reviews
+    {% if avg_rating %}
+      <span class="text-yellow-400 ml-2">{{ avg_rating|floatformat:1 }}★</span>
+    {% endif %}
+  </h2>
+  <div class="space-y-4">
+    {% for review in reviews %}
+    <div class="bg-card border border-subtle rounded-xl p-5">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <a href="{% url 'profile_view' review.reviewer.username %}"
+             class="text-white font-medium hover:text-teal-400 text-sm">
+            {{ review.reviewer.username }}
+          </a>
+          <span class="text-gray-600 text-xs">on {{ review.job.title }}</span>
+        </div>
+        <div class="flex gap-0.5">
+          {% for i in "12345" %}
+            {% if forloop.counter <= review.rating %}
+              <span class="text-yellow-400">★</span>
+            {% else %}
+              <span class="text-gray-600">★</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      <p class="text-gray-500 text-xs">{{ review.created_at|date:"M d, Y" }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

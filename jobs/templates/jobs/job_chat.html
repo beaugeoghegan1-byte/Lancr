@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Chat | {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-10 px-6">
+
+  {% if request.user.profile.role == 'client' %}
+    <a href="{% url 'client_dashboard' %}" class="text-gray-500 hover:text-teal-400 text-sm mb-6 inline-block">
+      ← Back to Dashboard
+    </a>
+  {% else %}
+    <a href="{% url 'freelancer_dashboard' %}" class="text-gray-500 hover:text-teal-400 text-sm mb-6 inline-block">
+      ← Back to Dashboard
+    </a>
+  {% endif %}
+
+  <h1 class="text-xl font-bold text-white mb-4">💬 {{ job.title }}</h1>
+
+  <!-- Progress bar + completion -->
+  <div class="bg-card border border-subtle rounded-2xl p-5 mb-6">
+
+    <!-- Steps -->
+    <div class="flex items-center justify-between mb-4">
+
+      <!-- Step 1: Open -->
+      <div class="flex flex-col items-center flex-1">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-teal-500 text-black">
+          ✓
+        </div>
+        <span class="text-xs text-gray-400 mt-1">Open</span>
+      </div>
+
+      <!-- Line 1 -->
+      <div class="flex-1 h-0.5 mx-2
+                  {% if job.status == 'in_progress' or job.status == 'closed' %}bg-teal-500{% else %}bg-gray-700{% endif %}">
+      </div>
+
+      <!-- Step 2: In Progress -->
+      <div class="flex flex-col items-center flex-1">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                    {% if job.status == 'in_progress' or job.status == 'closed' %}bg-teal-500 text-black{% else %}bg-gray-700 text-gray-400{% endif %}">
+          {% if job.status == 'in_progress' or job.status == 'closed' %}✓{% else %}2{% endif %}
+        </div>
+        <span class="text-xs text-gray-400 mt-1">In Progress</span>
+      </div>
+
+      <!-- Line 2 -->
+      <div class="flex-1 h-0.5 mx-2
+                  {% if job.status == 'closed' %}bg-teal-500{% else %}bg-gray-700{% endif %}">
+      </div>
+
+      <!-- Step 3: Complete -->
+      <div class="flex flex-col items-center flex-1">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                    {% if job.status == 'closed' %}bg-teal-500 text-black{% else %}bg-gray-700 text-gray-400{% endif %}">
+          {% if job.status == 'closed' %}✓{% else %}3{% endif %}
+        </div>
+        <span class="text-xs text-gray-400 mt-1">Complete</span>
+      </div>
+
+    </div>
+
+    <!-- Confirmation indicators -->
+    {% if job.status == 'in_progress' %}
+    <div class="flex gap-6 text-xs mb-4">
+      <span class="{% if job.completed_by_client %}text-teal-400{% else %}text-gray-600{% endif %}">
+        {% if job.completed_by_client %}✓{% else %}○{% endif %} Client confirmed
+      </span>
+      <span class="{% if job.completed_by_freelancer %}text-teal-400{% else %}text-gray-600{% endif %}">
+        {% if job.completed_by_freelancer %}✓{% else %}○{% endif %} Freelancer confirmed
+      </span>
+    </div>
+    {% endif %}
+
+    <!-- Mark complete button -->
+    {% if job.status == 'in_progress' %}
+
+      {% if request.user == job.client and not job.completed_by_client %}
+        <form method="post" action="{% url 'mark_complete' job.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-primary text-sm">✓ Mark as Complete</button>
+          <p class="text-gray-600 text-xs mt-2">
+            Both you and the freelancer must confirm to close the job.
+          </p>
+        </form>
+
+      {% elif request.user == job.client and job.completed_by_client %}
+        <p class="text-teal-400 text-sm font-medium">
+          ✓ You've confirmed completion — waiting for freelancer.
+        </p>
+
+      {% endif %}
+
+      {% if request.user == job.hired_freelancer and not job.completed_by_freelancer %}
+        <form method="post" action="{% url 'mark_complete' job.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-primary text-sm">✓ Mark as Complete</button>
+          <p class="text-gray-600 text-xs mt-2">
+            Both you and the client must confirm to close the job.
+          </p>
+        </form>
+
+      {% elif request.user == job.hired_freelancer and job.completed_by_freelancer %}
+        <p class="text-teal-400 text-sm font-medium">
+          ✓ You've confirmed completion — waiting for client.
+        </p>
+
+      {% endif %}
+
+    {% elif job.status == 'closed' %}
+      <div class="text-center">
+        <p class="text-green-400 font-medium">🎉 This job has been completed!</p>
+        <p class="text-gray-500 text-xs mt-1">
+          You can now leave a review on each other's profiles.
+        </p>
+        {% if request.user == job.client %}
+          <a href="{% url 'profile_view' job.hired_freelancer.username %}"
+             class="btn-secondary text-sm inline-block mt-3">
+            ⭐ Leave a Review
+          </a>
+        {% else %}
+          <a href="{% url 'profile_view' job.client.username %}"
+             class="btn-secondary text-sm inline-block mt-3">
+            ⭐ Leave a Review
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Chat box -->
+  <div id="chatBox"
+       class="bg-card border border-subtle p-4 rounded-xl space-y-3 mb-4 h-96 overflow-y-auto flex flex-col">
+    {% for message in messages %}
+      {% include "jobs/partials/message.html" %}
+    {% empty %}
+      <p class="text-gray-600 text-sm italic text-center mt-auto">
+        No messages yet. Say hello!
+      </p>
+    {% endfor %}
+  </div>
+
+  <!-- Message form — hidden if job is closed -->
+  {% if job.status != 'closed' %}
+  <form
+    hx-post="{% url 'send_message' job.id %}"
+    hx-target="#chatBox"
+    hx-swap="beforeend"
+    hx-on::after-request="this.reset()"
+    class="flex gap-2"
+  >
+    {% csrf_token %}
+    <input
+      type="text"
+      name="content"
+      placeholder="Type a message..."
+      class="input-dark flex-1"
+      required
+      autocomplete="off"
+    >
+    <button type="submit" class="btn-primary">Send</button>
+  </form>
+  {% else %}
+  <p class="text-center text-gray-600 text-sm">
+    This job is complete — messaging is closed.
+  </p>
+  {% endif %}
+
+</div>
+
+<script>
+  const chatBox = document.getElementById('chatBox');
+  function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
+  scrollToBottom();
+  chatBox.addEventListener('htmx:afterSwap', scrollToBottom);
+</script>
+
+{% endblock %}

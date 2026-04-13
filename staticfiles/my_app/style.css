@@ -1,0 +1,224 @@
+body {
+    background-color: black; 
+    color: lightgreen;
+    font-family: Arial, sans-serif;
+    margin: 40px;
+}
+
+h1 {
+    color: whitesmoke;
+}
+
+h2 {
+    color: whitesmoke;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+.auth-container {
+    width: 400px;
+    margin: 80px auto;
+    padding: 40px;
+    background: #1c1c1c;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 255, 170, 0.2);
+}
+
+.auth-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #00ffaa;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ccc;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background: #2a2a2a;
+    color: white;
+}
+
+.form-group input:focus {
+    outline: none;
+    border: 1px solid #00ffaa;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: #00ffaa;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    color: black;
+}
+
+.btn-primary:hover {
+    background: #00cc88;
+}
+
+.auth-link {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.auth-link a {
+    color: #00ffaa;
+    text-decoration: none;
+}
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+
+.job-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.description {
+    margin: 15px 0;
+    line-height: 1.6;
+}
+
+.job-meta {
+    margin-top: 15px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.remote {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.location {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.apply-box {
+    margin-top: 30px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+    resize: vertical;
+}
+
+button {
+    padding: 10px 18px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.chat-link {
+    margin-top: 20px;
+}
+
+.chat-link a {
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: bold;
+}
+
+.back-link {
+    margin-top: 20px;
+}
+.form-card {
+    background: #1e1e2f;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.4);
+    max-width: 700px;
+    margin: 40px auto;
+}
+
+.form-card h1 {
+    margin-bottom: 20px;
+}
+
+.form-card label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.form-card input,
+.form-card textarea,
+.form-card select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #12121b;
+    color: white;
+}
+
+.checkbox-field {
+    margin-top: 15px;
+}
+
+.form-card button {
+    margin-top: 20px;
+    width: 100%;
+}
+.apply-box {
+    margin-top: 30px;
+    padding: 25px;
+    background: #1e1e2f;
+    border-radius: 12px;
+}
+
+.applied-badge {
+    background: #0f5132;
+    color: #d1fae5;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+}

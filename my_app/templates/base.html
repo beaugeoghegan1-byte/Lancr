@@ -1,0 +1,148 @@
+{% load tz %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Lancr{% endblock %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            padding: 0;
+            margin: 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e1e1e;
+            padding: 15px 30px;
+            border-bottom: 1px solid #333;
+        }
+
+        .brand {
+            font-size: 1.8em;
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        nav.auth-links {
+            display: flex;
+            align-items: center;
+        }
+
+        nav.auth-links a,
+        nav.auth-links button {
+            color: #00ffff;
+            background: none;
+            border: none;
+            font: inherit;
+            margin-left: 20px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        nav.auth-links span {
+            color: #ccc;
+            margin-right: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .no-jobs {
+            color: #ccc;
+            font-style: italic;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .message.success { background-color: #14532d; }
+        .message.error { background-color: #7f1d1d; }
+        .message.info { background-color: #1e3a8a; }
+        .message.default { background-color: #374151; }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 40px;
+            border-top: 1px solid #333;
+            color: #888;
+        }
+
+        footer a {
+            color: #00ffcc;
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    
+    <header>
+        <div class="brand">Lancr.</div>
+        <nav class="auth-links">
+            <a href="/">Home</a>
+            {% if user.is_authenticated %}
+                <span>Hello, {{ user.username }}!</span>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+
+   
+    <div class="container">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags|default:'default' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}
+       
+        {% endblock %}
+    </div>
+
+    
+    <footer>
+        &copy; {{ now|date:"Y" }} <a href="/">Lancr</a>. All rights reserved.
+    </footer>
+    
+    <script>
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        if (csrfToken) {
+            event.detail.headers['X-CSRFToken'] = csrfToken;
+        }
+    });
+</script>
+
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</body>
+</html>
+
+</body>
+</html>
+
+
+

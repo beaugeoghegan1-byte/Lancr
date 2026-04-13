@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>💬 Messages for "{{ job.title }}"</h2>
+
+<div style="background:#111; padding:1rem; border-radius:10px;">
+  {% for msg in messages %}
+    <p>
+      <strong>{{ msg.sender.username }}:</strong> {{ msg.content }}
+      <br><small>{{ msg.timestamp|date:"M d, H:i" }}</small>
+    </p>
+  {% empty %}
+    <p>No messages yet for this job.</p>
+  {% endfor %}
+</div>
+
+<hr>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Send Message</button>
+</form>
+
+<a href="{% url 'home' %}">← Back to Home</a>
+{% endblock %}

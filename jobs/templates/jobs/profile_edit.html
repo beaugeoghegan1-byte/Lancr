@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile | Lancr{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto py-12 px-6">
+
+  <a href="{% url 'profile_view' request.user.username %}"
+     class="text-gray-500 hover:text-teal-400 text-sm mb-6 inline-block">
+    ← Back to Profile
+  </a>
+
+  <h1 class="text-2xl font-bold text-white mb-6">Edit Profile</h1>
+
+  <div class="bg-card border border-subtle rounded-2xl p-8">
+
+    <!-- Current avatar preview -->
+    <div class="flex items-center gap-4 mb-6">
+      {% if form.instance.avatar %}
+        <img src="{{ form.instance.avatar.url }}" alt="Current avatar"
+             class="w-16 h-16 rounded-full object-cover border-2 border-subtle">
+      {% else %}
+        <div class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-xl font-bold text-teal-400">
+          {{ request.user.username|first|upper }}
+        </div>
+      {% endif %}
+      <p class="text-gray-400 text-sm">Upload a new photo below to change your avatar.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-gray-400 text-sm mb-1">Username</label>
+        <input type="text" name="username" value="{{ form.fields.username.initial }}"
+               class="input-dark" required>
+      </div>
+
+      <div>
+        <label class="block text-gray-400 text-sm mb-1">Bio</label>
+        <textarea name="bio" class="input-dark h-28 resize-none"
+                  placeholder="Tell clients or freelancers about yourself...">{{ form.instance.bio }}</textarea>
+      </div>
+
+      <div>
+        <label class="block text-gray-400 text-sm mb-1">Profile Photo</label>
+        <input type="file" name="avatar" accept="image/*" class="input-dark text-gray-400">
+      </div>
+
+      <button type="submit" class="btn-primary w-full text-center">Save Changes</button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

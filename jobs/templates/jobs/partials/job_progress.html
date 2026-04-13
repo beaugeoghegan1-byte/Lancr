@@ -1,0 +1,84 @@
+{% if job.status == 'open' %}
+  {% with step=1 %}
+{% elif job.status == 'in_progress' %}
+  {% with step=2 %}
+{% else %}
+  {% with step=3 %}
+{% endwith %}
+{% endif %}
+
+<div class="mb-6">
+  <div class="flex items-center justify-between mb-2">
+
+    <!-- Step 1: Open -->
+    <div class="flex flex-col items-center flex-1">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                  {% if job.status == 'open' or job.status == 'in_progress' or job.status == 'closed' %}
+                    bg-teal-500 text-black
+                  {% else %}
+                    bg-gray-700 text-gray-400
+                  {% endif %}">
+        ✓
+      </div>
+      <span class="text-xs text-gray-400 mt-1">Open</span>
+    </div>
+
+    <!-- Line -->
+    <div class="flex-1 h-0.5 mx-2
+                {% if job.status == 'in_progress' or job.status == 'closed' %}
+                  bg-teal-500
+                {% else %}
+                  bg-gray-700
+                {% endif %}">
+    </div>
+
+    <!-- Step 2: In Progress -->
+    <div class="flex flex-col items-center flex-1">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                  {% if job.status == 'in_progress' or job.status == 'closed' %}
+                    bg-teal-500 text-black
+                  {% else %}
+                    bg-gray-700 text-gray-400
+                  {% endif %}">
+        {% if job.status == 'in_progress' or job.status == 'closed' %}✓{% else %}2{% endif %}
+      </div>
+      <span class="text-xs text-gray-400 mt-1">In Progress</span>
+    </div>
+
+    <!-- Line -->
+    <div class="flex-1 h-0.5 mx-2
+                {% if job.status == 'closed' %}
+                  bg-teal-500
+                {% else %}
+                  bg-gray-700
+                {% endif %}">
+    </div>
+
+    <!-- Step 3: Complete -->
+    <div class="flex flex-col items-center flex-1">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                  {% if job.status == 'closed' %}
+                    bg-teal-500 text-black
+                  {% else %}
+                    bg-gray-700 text-gray-400
+                  {% endif %}">
+        {% if job.status == 'closed' %}✓{% else %}3{% endif %}
+      </div>
+      <span class="text-xs text-gray-400 mt-1">Complete</span>
+    </div>
+
+  </div>
+
+  <!-- Confirmation status (in_progress only) -->
+  {% if job.status == 'in_progress' %}
+  <div class="mt-3 flex gap-3 text-xs text-gray-500">
+    <span class="{% if job.completed_by_client %}text-teal-400{% endif %}">
+      {% if job.completed_by_client %}✓{% else %}○{% endif %} Client confirmed
+    </span>
+    <span class="{% if job.completed_by_freelancer %}text-teal-400{% endif %}">
+      {% if job.completed_by_freelancer %}✓{% else %}○{% endif %} Freelancer confirmed
+    </span>
+  </div>
+  {% endif %}
+
+</div>

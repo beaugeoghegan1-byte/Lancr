@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Lancr{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+  <style>
+    body { background-color: #0f1117; color: #e2e8f0; }
+    .lancr-teal { color: #00e5b0; }
+    .bg-card { background-color: #1a1d27; }
+    .bg-card-hover:hover { background-color: #1f2335; }
+    .border-subtle { border-color: #2a2d3e; }
+    .input-dark {
+      background-color: #0f1117;
+      border: 1px solid #2a2d3e;
+      color: #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .input-dark:focus { outline: none; border-color: #00e5b0; }
+    .input-dark::placeholder { color: #4a5568; }
+    .btn-primary {
+      background-color: #00e5b0;
+      color: #0f1117;
+      font-weight: 700;
+      padding: 0.5rem 1.25rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.2s, transform 0.1s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background-color: #00c99a; transform: translateY(-1px); }
+    .btn-secondary {
+      background-color: #1f2335;
+      color: #e2e8f0;
+      font-weight: 600;
+      padding: 0.5rem 1.25rem;
+      border-radius: 0.5rem;
+      border: 1px solid #2a2d3e;
+      transition: border-color 0.2s;
+      display: inline-block;
+    }
+    .btn-secondary:hover { border-color: #00e5b0; color: #00e5b0; }
+    .htmx-indicator { display: none; }
+    .htmx-request .htmx-indicator { display: inline; }
+    .htmx-request.htmx-indicator { display: inline; }
+    .badge-open { background: #052e16; color: #4ade80; padding: 2px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-closed { background: #1c1917; color: #78716c; padding: 2px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-in_progress { background: #1c1a06; color: #facc15; padding: 2px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+
+    /* Notification dropdown */
+    .notif-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      padding-top: 8px;
+      width: 320px;
+      z-index: 50;
+    }
+    .notif-wrapper:hover .notif-dropdown { display: block; }
+    .notif-dropdown-inner {
+      background-color: #1a1d27;
+      border: 1px solid #2a2d3e;
+      border-radius: 0.75rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <nav class="bg-card border-b border-subtle px-6 py-4 flex items-center justify-between">
+    <a href="{% url 'home' %}" class="text-2xl font-black lancr-teal tracking-tight">Lancr.</a>
+
+    <div class="flex items-center gap-6 text-sm">
+      <a href="{% url 'job_list' %}" class="text-gray-400 hover:text-white transition">Jobs</a>
+
+      {% if user.is_authenticated %}
+
+        {% if user.profile.role == 'client' %}
+          <a href="{% url 'job_list' %}" class="btn-primary text-sm">Post Job</a>
+        {% endif %}
+
+        <a href="{% url 'profile_view' user.username %}"
+           class="text-gray-400 hover:text-white transition">Profile</a>
+
+        <a href="{% url 'client_dashboard' %}"
+           class="text-gray-400 hover:text-white transition">Dashboard</a>
+
+        <!-- Bell notification icon -->
+        <div class="notif-wrapper relative">
+
+          <button class="relative text-gray-400 hover:text-white transition focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            {% if unread_count > 0 %}
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold
+                         rounded-full w-4 h-4 flex items-center justify-center leading-none">
+              {{ unread_count }}
+            </span>
+            {% endif %}
+          </button>
+
+          <!-- Dropdown -->
+          <div class="notif-dropdown">
+            <div class="notif-dropdown-inner">
+
+              <div class="px-4 py-3 border-b border-subtle flex justify-between items-center">
+                <span class="text-white font-semibold text-sm">Notifications</span>
+                {% if unread_count > 0 %}
+                  <span class="text-xs text-teal-400">{{ unread_count }} unread</span>
+                {% endif %}
+              </div>
+
+              <ul class="max-h-80 overflow-y-auto">
+                {% for notif in user.notifications.all|slice:":10" %}
+                <li id="notif-{{ notif.id }}"
+                    class="border-b border-subtle last:border-0 transition
+                           {% if not notif.is_read %}
+                             bg-teal-900/30 border-l-4 border-l-teal-400
+                           {% else %}
+                             hover:bg-gray-800
+                           {% endif %}">
+                  <div class="flex items-center gap-2 px-4 py-3">
+
+                    <!-- Notification link -->
+                    <a href="{% url 'notification_read' notif.id %}" class="flex-1 block">
+                      <div class="flex items-start gap-2">
+                        {% if not notif.is_read %}
+                          <span class="w-2 h-2 rounded-full bg-teal-400 mt-1.5 shrink-0"></span>
+                        {% else %}
+                          <span class="w-2 h-2 mt-1.5 shrink-0"></span>
+                        {% endif %}
+                        <div class="flex-1">
+                          <div class="flex items-start gap-1.5">
+                            {% if notif.type == 'application' %}
+                              <span class="mt-0.5">📋</span>
+                            {% elif notif.type == 'accepted' %}
+                              <span class="mt-0.5">✅</span>
+                            {% elif notif.type == 'rejected' %}
+                              <span class="mt-0.5">❌</span>
+                            {% elif notif.type == 'message' %}
+                              <span class="mt-0.5">💬</span>
+                            {% endif %}
+                            <p class="text-sm leading-snug
+                                      {% if not notif.is_read %}
+                                        text-white font-semibold
+                                      {% else %}
+                                        text-gray-400
+                                      {% endif %}">
+                              {{ notif.message }}
+                            </p>
+                          </div>
+                          <p class="text-xs text-gray-600 mt-1 ml-5">
+                            {{ notif.created_at|timesince }} ago
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+
+                    <!-- Dismiss button -->
+                  <button
+                   hx-post="{% url 'delete_notification' notif.id %}"
+                   hx-target="#notif-{{ notif.id }}"
+                   hx-swap="outerHTML"
+                   hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                   class="text-gray-600 hover:text-red-400 transition text-xl leading-none shrink-0 ml-1"
+                   title="Dismiss">
+                 ×
+                  </button>
+
+                  </div>
+                </li>
+                {% empty %}
+                <li class="px-4 py-8 text-center text-gray-500 text-sm">
+                  No notifications yet.
+                </li>
+                {% endfor %}
+              </ul>
+
+            </div>
+          </div>
+        </div>
+
+        <span class="text-gray-500">Hello,
+          <span class="text-white font-medium">{{ user.username }}</span>!
+        </span>
+
+        <form method="post" action="{% url 'logout' %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="btn-secondary text-sm">Logout</button>
+        </form>
+
+      {% else %}
+        <a href="{% url 'login' %}" class="text-gray-400 hover:text-white transition">Login</a>
+        <a href="{% url 'register' %}" class="btn-primary text-sm">Sign Up</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="border-t border-subtle text-center text-gray-600 text-sm py-6">
+    © <a href="{% url 'home' %}" class="lancr-teal hover:underline">Lancr.</a> All rights reserved.
+  </footer>
+
+</body>
+</html>
