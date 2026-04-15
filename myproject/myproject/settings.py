@@ -24,11 +24,12 @@ DEBUG = False
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'lancr-production.up.railway.app',
+    'lancr.up.railway.app',
+    '8080'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://lancr-production.up.railway.app',
+    'https://lancr.up.railway.app',
 ]
 
 INSTALLED_APPS = [
