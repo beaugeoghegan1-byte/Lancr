@@ -9,11 +9,12 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+
 from pathlib import Path
 import os
 import dj_database_url
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -30,6 +31,7 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     'https://lancr-production.up.railway.app',
 ]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -75,6 +77,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
+# Database — PostgreSQL on Railway, SQLite locally
 DATABASES = {
     'default': dj_database_url.config(
         default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
@@ -110,3 +113,4 @@ APPEND_SLASH = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+

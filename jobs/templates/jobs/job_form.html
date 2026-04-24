@@ -9,38 +9,59 @@
 Post a New Job
 </h1>
 
-<form method="post" class="bg-card border border-subtle p-6 rounded-2xl space-y-4">
+<form method="post" enctype="multipart/form-data" class="bg-card border border-subtle p-6 rounded-2xl space-y-4">
 
 {% csrf_token %}
+{% if form.errors %}
+  <div class="bg-red-900/30 border border-red-600 rounded-xl p-4 text-sm text-red-300 space-y-1">
+    {% for field in form %}
+      {% for error in field.errors %}
+        <p><span class="font-medium">{{ field.label }}:</span> {{ error }}</p>
+      {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+      <p>{{ error }}</p>
+    {% endfor %}
+  </div>
+{% endif %}
+
 
 <div>
-<label class="text-sm text-gray-400">Title</label>
+<label for="{ form.title.id_for_label }" class="text-sm text-gray-400">Title</label>
 {{ form.title }}
+{% if form.title.errors %}
+  <p class="text-red-400 text-xs mt-1">{{ form.title.errors.0 }}</p>
+{% endif %}
 </div>
 
 <div>
-<label class="text-sm text-gray-400">Description</label>
+<label for="{{ form.description.id_for_label }}" class="text-sm text-gray-400">Description</label>
 {{ form.description }}
 </div>
 
 <div>
-<label class="text-sm text-gray-400">Category</label>
+<label for="{{ form.category.id_for_label }}" class="text-sm text-gray-400">Category</label>
 {{ form.category }}
 </div>
 
 <div>
-<label class="text-sm text-gray-400">Budget ($)</label>
+<label for="{{ form.budget.id_for_label }}" class="text-sm text-gray-400">Budget</label>
 {{ form.budget }}
 </div>
 
 <div class="flex items-center gap-2">
 {{ form.remote }}
-<label class="text-sm text-gray-400">Remote job</label>
+<label for="{{ form.remote.id_for_label }}" class="text-sm text-gray-400">Remote job</label>
 </div>
 
 <div>
-<label class="text-sm text-gray-400">Location</label>
+<label for="{{ form.location.id_for_label }}" class="text-sm text-gray-400">Location</label>
 {{ form.location }}
+</div>
+
+<div>
+  <label class="text-sm text-gray-400">Images (optional)</label>
+  <input type="file" name="images" multiple accept="image/*" class="text-sm text-gray-400">
 </div>
 
 <button type="submit" class="btn-primary">

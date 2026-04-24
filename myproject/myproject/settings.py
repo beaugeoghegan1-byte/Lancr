@@ -21,15 +21,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-d21k(luuvqwtli&)f3zi-
 
 DEBUG = False
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'lancr.up.railway.app',
-    '8080'
-]
+ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://lancr.up.railway.app',
+    'https://lancr-production.up.railway.app',
 ]
 
 INSTALLED_APPS = [

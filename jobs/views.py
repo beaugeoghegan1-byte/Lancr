@@ -109,34 +109,6 @@ def profile_view(request, username):
     })
 
 # ------------------------
-# POST JOB
-# ------------------------
-@login_required
-def job_create(request):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        budget = request.POST.get("budget")
-        category = request.POST.get("category")
-
-        job = Job.objects.create(
-            title=title,
-            description=description,
-            budget=budget,
-            category=category,
-            client=request.user
-        )
-        html = render_to_string(
-            "jobs/partials/job_card.html",
-            {"job": job},
-            request=request
-        )
-        return HttpResponse(html)
-
-    return redirect("job_list")
-
-
-# ------------------------
 # APPLY TO JOB
 #
 
@@ -362,58 +334,54 @@ def profile_edit(request):
         form = ProfileEditForm(instance=profile, user=request.user)
     return render(request, 'jobs/profile_edit.html', {'form': form})
 
-
 @login_required
 def job_create(request):
     if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        budget = request.POST.get("budget")
-        category = request.POST.get("category")
-        location = request.POST.get("location", "")
-        remote = request.POST.get("remote") == "on"
-        currency = request.POST.get("currency", "EUR")
+        form = JobForm(request.POST)
+        if form.is_valid():
+            # form.save(commit=False) builds the object without hitting the DB yet
+            # so we can attach the client (which the form doesn't know about)
+            job = form.save(commit=False)
+            job.client = request.user
 
-        job = Job.objects.create(
-            title=title,
-            description=description,
-            budget=budget,
-            category=category,
-            location=location,
-            remote=remote,
-            currency=currency,
-            client=request.user
-        )
+            # currency isn't in JobForm.fields, so read it manually
+            job.currency = request.POST.get("currency", "EUR")
+            job.save()
 
-        for image in request.FILES.getlist('images'):
-            JobImage.objects.create(job=job, image=image)
+            # Handle image uploads (still manual — they're not in JobForm either)
+            for image in request.FILES.getlist('images'):
+                JobImage.objects.create(job=job, image=image)
 
-        if request.headers.get("HX-Request") == "true":
-            job_card_html = render_to_string(
-                "jobs/_job_card.html",
-                {"job": job, "user": request.user},
-                request=request
-            )
-            # Return confirmation banner + job card
-            return HttpResponse(f"""
-                <li id="job-confirm-banner"
-                    class="bg-teal-900/40 border border-teal-600 rounded-2xl p-4
-                           flex items-center justify-between gap-4 mb-2"
-                    _="on load wait 4s then remove me">
-                  <div class="flex items-center gap-3">
-                    <span class="text-2xl">✅</span>
-                    <div>
-                      <p class="text-teal-300 font-semibold text-sm">Job posted successfully!</p>
-                      <p class="text-teal-400/70 text-xs mt-0.5">"{job.title}" is now live and visible to freelancers.</p>
-                    </div>
-                  </div>
-                </li>
-                {job_card_html}
-            """)
+            if request.headers.get("HX-Request") == "true":
+                job_card_html = render_to_string(
+                    "jobs/_job_card.html",
+                    {"job": job, "user": request.user},
+                    request=request
+                )
+                return HttpResponse(f"""
+                    <li id="job-confirm-banner"
+                        class="bg-teal-900/40 border border-teal-600 rounded-2xl p-4
+                               flex items-center justify-between gap-4 mb-2"
+                        _="on load wait 4s then remove me">
+                      <div class="flex items-center gap-3">
+                        <span class="text-2xl">✅</span>
+                        <div>
+                          <p class="text-teal-300 font-semibold text-sm">Job posted successfully!</p>
+                          <p class="text-teal-400/70 text-xs mt-0.5">"{job.title}" is now live.</p>
+                        </div>
+                      </div>
+                    </li>
+                    {job_card_html}
+                """)
 
-        return redirect('job_list')
+            return redirect('job_list')
 
-    return redirect('job_list')
+        # form is invalid — re-render the form with error messages
+        return render(request, 'jobs/job_form.html', {'form': form})
+
+    # GET request — show a blank form
+    form = JobForm()
+    return render(request, 'jobs/job_form.html', {'form': form})
 
 @login_required
 def mark_notifications_read(request):
