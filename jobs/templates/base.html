@@ -46,6 +46,11 @@
       border: 1px solid #2a2d3e;
     }
     .btn-secondary:hover { border-color: #00e5b0; color: #00e5b0; }
+
+    @media (min-width: 768px) {
+  #mobileMenu { display: none !important; }
+  #mobileControls { display: none !important; }
+}
   </style>
 
 </head>
@@ -154,7 +159,7 @@
     </div>
 
     <!-- Mobile: bell + hamburger -->
-    <div class="flex items-center gap-3 md:hidden">
+   <div class="flex items-center gap-3 md:hidden" id="mobileControls">
 
       {% if user.is_authenticated %}
       <!-- Bell on mobile -->
@@ -220,7 +225,7 @@
   </div>
 
   <!-- Mobile menu dropdown -->
-  <div id="mobileMenu" class="hidden md:hidden mt-4 space-y-2 text-sm border-t border-subtle pt-4">
+  <div id="mobileMenu" class="hidden mt-4 space-y-2 text-sm border-t border-subtle pt-4">
     <a href="{% url 'job_list' %}" class="block text-gray-400 hover:text-white py-2 transition">Jobs</a>
 
     {% if user.is_authenticated %}
@@ -262,7 +267,7 @@
 
       <!-- Simple notification indicator -->
       <span class="text-gray-400 text-xs">
-        🔔 {{ unread_count }}
+         {{ unread_count }}
       </span>
 
       <form method="post" action="{% url 'logout' %}" class="inline">
@@ -286,7 +291,7 @@
     <a href="{% url 'client_dashboard' %}" class="text-gray-400">Dashboard</a>
 
     <span class="text-gray-400 text-xs">
-      🔔 {{ unread_count }}
+      {{ unread_count }}
     </span>
 
     <form method="post" action="{% url 'logout' %}">
