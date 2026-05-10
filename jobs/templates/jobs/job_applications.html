@@ -24,7 +24,6 @@
           <!-- Header row -->
           <div class="flex justify-between items-start mb-3">
             <div>
-              <!-- Clickable freelancer name -->
               <a href="{% url 'profile_view' app.freelancer.username %}"
                  class="text-lg font-semibold text-white hover:text-teal-400 transition">
                 {{ app.freelancer.username }}
@@ -65,13 +64,29 @@
           <!-- Actions if accepted -->
           {% if app.status == "accepted" %}
             <div class="mt-4 pt-4 border-t border-subtle flex flex-wrap gap-3">
+
               <a href="{% url 'job_chat' job.id %}" class="btn-secondary text-sm">
                 💬 Open Chat with {{ app.freelancer.username }}
               </a>
+
               <a href="{% url 'profile_view' app.freelancer.username %}"
                  class="btn-secondary text-sm">
                 ⭐ View Profile & Leave Review
               </a>
+
+              <!-- Payment button -->
+              {% if job.status == "in_progress" %}
+                {% if job.payment %}
+                  <span class="text-teal-400 text-sm font-medium self-center">
+                    ✓ Payment made
+                  </span>
+                {% else %}
+                  <a href="{% url 'create_payment' job.id %}" class="btn-primary text-sm">
+                    💳 Pay for Job
+                  </a>
+                {% endif %}
+              {% endif %}
+
             </div>
           {% endif %}
 

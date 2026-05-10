@@ -38,6 +38,10 @@ urlpatterns = [
     path('profile/<str:username>/review/', views.leave_review, name='leave_review'),
 
     path('jobs/<int:id>/complete/', views.mark_complete, name='mark_complete'),
+
+    path('stripe/connect/', views.stripe_connect, name='stripe_connect'),
+path('stripe/connect/complete/', views.stripe_connect_complete, name='stripe_connect_complete'),
+path('jobs/<int:job_id>/payment/', views.create_payment, name='create_payment'),
 ]
 
 

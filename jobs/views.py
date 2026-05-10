@@ -4,11 +4,14 @@ from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequ
 from django.template.loader import render_to_string
 from django.db import models
 from django.db.models import Avg, Q 
-from .models import Job, Application, JobImage , Notification, Review
+from .models import Job, Application, JobImage , Notification, Payment, Review
 from .forms import JobForm, RegisterForm, ProfileEditForm
 from .models import Message
 from django.contrib.auth import get_user_model
+import stripe 
+from django.conf import settings as django_settings
 
+stripe.api_key = django_settings.STRIPE_SECRET_KEY
 
 def home(request):
     User = get_user_model()
@@ -385,10 +388,8 @@ def job_create(request):
 
 @login_required
 def mark_notifications_read(request):
-    notification = get_object_or_404(Notification, id=id, user=request.user)
-    notification.is_read = True
-    notification.save()
-    return redirect(notification.link)
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+    return HttpResponse(status=200)
 
 
 @login_required
@@ -482,3 +483,112 @@ def mark_complete(request, id):
 
     job.save()
     return redirect('job_chat', job_id=job.id)
+
+
+# STRIPE CONNECT ONBOARDING (freelancers)
+# ------------------------
+@login_required
+def stripe_connect(request):
+    if request.user.profile.role != 'freelancer':
+        return HttpResponseForbidden()
+
+    profile = request.user.profile
+
+    # Create Stripe account if doesn't exist
+    if not profile.stripe_account_id:
+        account = stripe.Account.create(
+            type='express',
+            email=request.user.email,
+            capabilities={
+                'card_payments': {'requested': True},
+                'transfers': {'requested': True},
+            },
+        )
+        profile.stripe_account_id = account.id
+        profile.save()
+
+    # Create onboarding link
+    account_link = stripe.AccountLink.create(
+        account=profile.stripe_account_id,
+        refresh_url=request.build_absolute_uri('/stripe/connect/'),
+        return_url=request.build_absolute_uri('/stripe/connect/complete/'),
+        type='account_onboarding',
+    )
+
+    return redirect(account_link.url)
+
+
+@login_required
+def stripe_connect_complete(request):
+    profile = request.user.profile
+    if profile.stripe_account_id:
+        account = stripe.Account.retrieve(profile.stripe_account_id)
+        if account.charges_enabled:
+            profile.stripe_onboarded = True
+            profile.save()
+    return redirect('client_dashboard')
+
+
+# ------------------------
+# CREATE PAYMENT (client pays when hiring)
+# ------------------------
+@login_required
+def create_payment(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+
+    if request.user != job.client:
+        return HttpResponseForbidden()
+
+    if not job.hired_freelancer:
+        return HttpResponseBadRequest("No freelancer hired yet.")
+
+    freelancer_profile = job.hired_freelancer.profile
+
+    # Calculate amounts in cents
+    amount_cents = int(job.budget * 100)
+    fee_percent = getattr(django_settings, 'STRIPE_PLATFORM_FEE_PERCENT', 0)
+    fee_cents = int(amount_cents * fee_percent / 100)
+
+    # Map currency to Stripe format
+    currency_map = {
+        'EUR': 'eur', 'USD': 'usd', 'GBP': 'gbp',
+        'CAD': 'cad', 'AUD': 'aud'
+    }
+    stripe_currency = currency_map.get(job.currency, 'eur')
+
+    # Create payment intent
+    intent_kwargs = {
+        'amount': amount_cents,
+        'currency': stripe_currency,
+        'metadata': {'job_id': job.id},
+        'capture_method': 'automatic',
+    }
+
+    # Only add transfer if freelancer is onboarded
+    if freelancer_profile.stripe_onboarded and freelancer_profile.stripe_account_id:
+        intent_kwargs['transfer_data'] = {
+            'destination': freelancer_profile.stripe_account_id,
+        }
+        if fee_cents > 0:
+            intent_kwargs['application_fee_amount'] = fee_cents
+
+    intent = stripe.PaymentIntent.create(**intent_kwargs)
+
+    # Save payment record
+    Payment.objects.update_or_create(
+        job=job,
+        defaults={
+            'amount': job.budget,
+            'currency': job.currency,
+            'platform_fee': fee_cents / 100,
+            'stripe_payment_intent_id': intent.id,
+            'status': 'pending',
+        }
+    )
+
+    return render(request, 'jobs/payment.html', {
+        'job': job,
+        'client_secret': intent.client_secret,
+        'stripe_public_key': django_settings.STRIPE_PUBLIC_KEY,
+        'amount': job.budget,
+    })

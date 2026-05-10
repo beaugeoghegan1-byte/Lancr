@@ -8,6 +8,24 @@
 
   <h1 class="text-2xl font-bold text-white mb-8">Freelancer Dashboard</h1>
 
+  <!-- Stripe connect prompt -->
+  {% if not request.user.profile.stripe_onboarded %}
+  <div class="bg-yellow-900/30 border border-yellow-700 rounded-xl p-4 mb-8 flex items-center justify-between gap-4">
+    <div>
+      <p class="text-yellow-300 text-sm font-semibold">⚠️ Connect your bank account to receive payments</p>
+      <p class="text-yellow-600 text-xs mt-1">You won't be able to receive payment for completed jobs until you connect with Stripe.</p>
+    </div>
+    <a href="{% url 'stripe_connect' %}" class="btn-primary text-sm shrink-0">
+      Connect with Stripe
+    </a>
+  </div>
+  {% else %}
+  <div class="bg-teal-900/20 border border-teal-700 rounded-xl p-4 mb-8 flex items-center gap-3">
+    <span class="text-teal-400 text-lg">✓</span>
+    <p class="text-teal-300 text-sm font-medium">Bank account connected — you can receive payments.</p>
+  </div>
+  {% endif %}
+
   <!-- ACTIVE JOBS -->
   <h2 class="text-xl font-semibold text-white mb-4">Active Jobs</h2>
 

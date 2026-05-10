@@ -108,8 +108,32 @@ class Profile(models.Model):
     bio = models.TextField(blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
+    # Stripe fields
+    stripe_account_id = models.CharField(max_length=255, blank=True)
+    stripe_onboarded = models.BooleanField(default=False)
+
     def __str__(self):
         return f"{self.user.username} ({self.role})"
+
+class Payment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('held', 'Held'),
+        ('released', 'Released'),
+        ('refunded', 'Refunded'),
+    ]
+
+    job = models.OneToOneField(Job, on_delete=models.CASCADE, related_name='payment')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='EUR')
+    platform_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    stripe_payment_intent_id = models.CharField(max_length=255, blank=True)
+    stripe_transfer_id = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Payment for {self.job.title} — {self.status}"
 
 
 class Message(models.Model):
