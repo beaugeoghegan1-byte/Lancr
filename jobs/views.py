@@ -11,7 +11,6 @@ from django.contrib.auth import get_user_model
 import stripe 
 from django.conf import settings as django_settings
 
-stripe.api_key = django_settings.STRIPE_SECRET_KEY
 
 def home(request):
     User = get_user_model()
