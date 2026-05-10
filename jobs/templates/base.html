@@ -69,7 +69,6 @@
     }
     /* Hide mobile controls on desktop */
     #mobileControls { display: none; }
-    #mobileMenu { display: none; }
     @media (max-width: 767px) {
       #mobileControls { display: flex; }
       .desktop-nav { display: none !important; }
@@ -228,7 +227,7 @@
     </div>
 
     <!-- Mobile menu -->
-    <div id="mobileMenu" class="mt-4 space-y-2 text-sm border-t border-subtle pt-4">
+    <div id="mobileMenu" class="hidden mt-4 space-y-2 text-sm border-t border-subtle pt-4">
       <a href="{% url 'job_list' %}" class="block text-gray-400 hover:text-white py-2">Jobs</a>
       {% if user.is_authenticated %}
         {% if user.profile.role == 'client' %}
