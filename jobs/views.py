@@ -8,7 +8,10 @@ from .models import Job, Application, JobImage , Notification, Payment, Review
 from .forms import JobForm, RegisterForm, ProfileEditForm
 from .models import Message
 from django.contrib.auth import get_user_model
-import stripe 
+try:
+    import stripe 
+except ImportError:
+    stripe = None
 from django.conf import settings as django_settings
 
 
