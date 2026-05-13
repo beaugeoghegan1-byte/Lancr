@@ -244,27 +244,30 @@ def hire_freelancer(request, id):
 # ------------------------
 @login_required
 def client_dashboard(request):
-    profile = request.user.profile
+    try:
+        profile = request.user.profile
 
-    if profile.role == "client":
-        jobs = Job.objects.filter(client=request.user)
-        return render(request, "jobs/client_dashboard.html", {
-            "jobs": jobs
-        })
+        if profile.role == "client":
+            jobs = Job.objects.filter(client=request.user)
+            return render(request, "jobs/client_dashboard.html", {
+                "jobs": jobs
+            })
 
-    elif profile.role == "freelancer":
-        applications = Application.objects.filter(
-            freelancer=request.user
-        ).select_related("job")
+        elif profile.role == "freelancer":
+            applications = Application.objects.filter(
+                freelancer=request.user
+            ).select_related("job")
 
-        active_jobs = Job.objects.filter(
-            hired_freelancer=request.user,
-            status="in_progress"
-        )
-        return render(request, "jobs/freelancer_dashboard.html", {
-            "applications": applications,
-            "active_jobs": active_jobs
-        })
+            active_jobs = Job.objects.filter(
+                hired_freelancer=request.user,
+                status="in_progress"
+            )
+            return render(request, "jobs/freelancer_dashboard.html", {
+                "applications": applications,
+                "active_jobs": active_jobs
+            })
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}", status=500)
 
 
 # ------------------------

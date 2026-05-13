@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+import stripe
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -142,3 +143,9 @@ AXES_FAILURE_LIMIT = 5  # attempts before lockout
 AXES_COOLOFF_TIME = 1  # hours locked out
 AXES_LOCKOUT_TEMPLATE = None  # optional custom page
 AXES_RESET_ON_SUCCESS = True  # reset counter on successful login
+
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', '')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_PLATFORM_FEE_PERCENT = int(os.environ.get('STRIPE_PLATFORM_FEE_PERCENT', 0))
+
+stripe.api_key = STRIPE_SECRET_KEY
