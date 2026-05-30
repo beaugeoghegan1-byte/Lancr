@@ -494,34 +494,42 @@ def mark_complete(request, id):
 # ------------------------
 @login_required
 def stripe_connect(request):
-    if request.user.profile.role != 'freelancer':
-        return HttpResponseForbidden()
+    try:
+        stripe.api_key = django_settings.STRIPE_SECRET_KEY
+        
+        if not stripe.api_key:
+            return HttpResponse("Stripe not configured", status=500)
 
-    profile = request.user.profile
 
-    # Create Stripe account if doesn't exist
-    if not profile.stripe_account_id:
-        account = stripe.Account.create(
-            type='express',
-            email=request.user.email,
-            capabilities={
-                'card_payments': {'requested': True},
-                'transfers': {'requested': True},
-            },
+
+        if request.user.profile.role != 'freelancer':
+            return HttpResponseForbidden()
+
+        profile = request.user.profile
+
+        if not profile.stripe_account_id:
+            account = stripe.Account.create(
+                type='express',
+                email=request.user.email,
+                capabilities={
+                    'card_payments': {'requested': True},
+                    'transfers': {'requested': True},
+                },
+            )
+            profile.stripe_account_id = account.id
+            profile.save()
+
+        account_link = stripe.AccountLink.create(
+            account=profile.stripe_account_id,
+            refresh_url=request.build_absolute_uri('/stripe/connect/'),
+            return_url=request.build_absolute_uri('/stripe/connect/complete/'),
+            type='account_onboarding',
         )
-        profile.stripe_account_id = account.id
-        profile.save()
 
-    # Create onboarding link
-    account_link = stripe.AccountLink.create(
-        account=profile.stripe_account_id,
-        refresh_url=request.build_absolute_uri('/stripe/connect/'),
-        return_url=request.build_absolute_uri('/stripe/connect/complete/'),
-        type='account_onboarding',
-    )
+        return redirect(account_link.url)
 
-    return redirect(account_link.url)
-
+    except Exception as e:
+        return HttpResponse(f"Stripe error: {str(e)}", status=500)
 
 @login_required
 def stripe_connect_complete(request):
