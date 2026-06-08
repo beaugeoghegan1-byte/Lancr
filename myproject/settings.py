@@ -120,3 +120,10 @@ STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', '')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
 STRIPE_PLATFORM_FEE_PERCENT = int(os.environ.get('STRIPE_PLATFORM_FEE_PERCENT', 0))
 stripe.api_key = STRIPE_SECRET_KEY
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
