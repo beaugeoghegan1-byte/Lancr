@@ -391,6 +391,37 @@ def job_create(request):
     form = JobForm()
     return render(request, 'jobs/job_form.html', {'form': form})
 
+def freelancer_list(request):
+    User = get_user_model()
+    freelancers = User.objects.filter(
+        profile__role='freelancer'
+    ).select_related('profile').annotate(
+        avg_rating=Avg('reviews_received__rating'),
+        total_reviews=models.Count('reviews_received')
+    )
+
+    # Filters
+    county = request.GET.get('county')
+    trade = request.GET.get('trade')
+    available = request.GET.get('available')
+
+    if county:
+        freelancers = freelancers.filter(profile__county__icontains=county)
+    if trade:
+        freelancers = freelancers.filter(profile__trade__icontains=trade)
+    if available:
+        freelancers = freelancers.filter(profile__is_available=True)
+
+    return render(request, 'jobs/freelancer_list.html', {
+        'freelancers': freelancers,
+        'county': county,
+        'trade': trade,
+        'available': available,
+    })
+
+
+
+
 @login_required
 def mark_notifications_read(request):
     request.user.notifications.filter(is_read=False).update(is_read=True)

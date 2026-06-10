@@ -73,19 +73,16 @@
                  class="btn-secondary text-sm">
                 ⭐ View Profile & Leave Review
               </a>
-
-              <!-- Payment button -->
-              {% if job.status == "in_progress" %}
-                {% if job.payment %}
-                  <span class="text-teal-400 text-sm font-medium self-center">
-                    ✓ Payment made
-                  </span>
-                {% else %}
-                  <a href="{% url 'create_payment' job.id %}" class="btn-primary text-sm">
-                    💳 Pay for Job
-                  </a>
-                {% endif %}
-              {% endif %}
+              
+<!-- Payment - coming soon
+{% if job.status == "in_progress" %}
+  {% if job.payment %}
+    <span class="text-teal-400 text-sm font-medium self-center">✓ Payment made</span>
+  {% else %}
+    <a href="{% url 'create_payment' job.id %}" class="btn-primary text-sm">💳 Pay for Job</a>
+  {% endif %}
+{% endif %}
+-->
 
             </div>
           {% endif %}

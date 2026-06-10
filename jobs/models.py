@@ -111,6 +111,13 @@ class Profile(models.Model):
     # Stripe fields
     stripe_account_id = models.CharField(max_length=255, blank=True)
     stripe_onboarded = models.BooleanField(default=False)
+    #freelancer-specific browsing fields
+    trade = models.CharField(max_length=100, blank=True)        # e.g. "Plumber"
+    hourly_rate = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    county = models.CharField(max_length=100, blank=True)       # e.g. "Meath"
+    years_experience = models.IntegerField(null=True, blank=True)
+    is_available = models.BooleanField(default=True)
+    skills = models.CharField(max_length=255, blank=True) 
 
     def __str__(self):
         return f"{self.user.username} ({self.role})"

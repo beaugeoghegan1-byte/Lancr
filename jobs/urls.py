@@ -13,6 +13,8 @@ urlpatterns = [
 
     path('jobs/<int:id>/apply/', views.apply_job, name='apply_job'),
 
+    path('freelancers/', views.freelancer_list, name='freelancer_list'),
+
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
@@ -23,7 +25,7 @@ urlpatterns = [
 
     # Both URLs point to the same view — role is handled inside it
     path('dashboard/', views.client_dashboard, name='client_dashboard'),
-    path('dashboard/', views.client_dashboard, name='freelancer_dashboard'),
+    
 
     path('jobs/<int:job_id>/chat/', views.job_chat, name='job_chat'),
     path('jobs/<int:job_id>/send/', views.send_message, name='send_message'),
