@@ -30,6 +30,7 @@
     <form method="post" enctype="multipart/form-data" class="space-y-5">
       {% csrf_token %}
 
+      <!-- Basic info -->
       <div>
         <label class="block text-gray-400 text-sm mb-1">Username</label>
         <input type="text" name="username" value="{{ form.fields.username.initial }}"
@@ -47,7 +48,59 @@
         <input type="file" name="avatar" accept="image/*" class="input-dark text-gray-400">
       </div>
 
-      <button type="submit" class="btn-primary w-full text-center">Save Changes</button>
+      <!-- Freelancer-only section -->
+      {% if request.user.profile.role == 'freelancer' %}
+      <div class="border-t border-subtle pt-6 mt-2">
+        <h2 class="text-white font-semibold mb-1">Tradesperson Details</h2>
+        <p class="text-gray-500 text-sm mb-5">This info appears on your public profile and in the freelancer directory.</p>
+
+        <div class="space-y-4">
+
+          <div>
+            <label class="block text-gray-400 text-sm mb-1">Trade / Skill</label>
+            <input type="text" name="trade" value="{{ form.instance.trade }}"
+                   class="input-dark" placeholder="e.g. Plumber, Electrician, Carpenter">
+          </div>
+
+          <div>
+            <label class="block text-gray-400 text-sm mb-1">County</label>
+            <select name="county" class="input-dark">
+              <option value="">Select county...</option>
+              {% with counties="Carlow,Dublin,Kildare,Kilkenny,Laois,Longford,Louth,Meath,Offaly,Westmeath,Wexford,Wicklow,Clare,Cork,Kerry,Limerick,Tipperary,Waterford,Galway,Leitrim,Mayo,Roscommon,Sligo,Cavan,Donegal,Monaghan" %}
+              {% for c in counties.split(",") %}
+                <option value="{{ c }}" {% if form.instance.county == c %}selected{% endif %}>{{ c }}</option>
+              {% endfor %}
+              {% endwith %}
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-1">Hourly Rate (€)</label>
+              <input type="number" name="hourly_rate" value="{{ form.instance.hourly_rate|default:'' }}"
+                     class="input-dark" placeholder="e.g. 45" min="0" step="0.01">
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-1">Years Experience</label>
+              <input type="number" name="years_experience" value="{{ form.instance.years_experience|default:'' }}"
+                     class="input-dark" placeholder="e.g. 5" min="0">
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 pt-1">
+            <input type="checkbox" name="is_available" id="is_available"
+                   class="accent-teal-500 w-4 h-4"
+                   {% if form.instance.is_available %}checked{% endif %}>
+            <label for="is_available" class="text-gray-300 text-sm cursor-pointer">
+              I'm available for new work
+            </label>
+          </div>
+
+        </div>
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn-primary w-full text-center mt-2">Save Changes</button>
     </form>
   </div>
 
