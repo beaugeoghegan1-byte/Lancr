@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Freelancers{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-10">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-white">Find a Tradesperson</h1>
+    <p class="text-gray-400 mt-1">Browse skilled workers across Leinster — ready to take on your next job.</p>
+  </div>
+
+  <!-- Filters -->
+  <form method="GET" action="{% url 'freelancer_list' %}" class="flex flex-wrap gap-3 mb-8">
+    <input
+      type="text"
+      name="county"
+      value="{{ county|default:'' }}"
+      placeholder="County (e.g. Meath)"
+      class="bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-teal-500"
+    />
+    <input
+      type="text"
+      name="trade"
+      value="{{ trade|default:'' }}"
+      placeholder="Trade (e.g. Plumber)"
+      class="bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-teal-500"
+    />
+    <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+      <input
+        type="checkbox"
+        name="available"
+        value="1"
+        {% if available %}checked{% endif %}
+        class="accent-teal-500"
+      />
+      Available now
+    </label>
+    <button
+      type="submit"
+      class="bg-teal-600 hover:bg-teal-500 text-white text-sm font-medium px-5 py-2 rounded-xl transition"
+    >
+      Search
+    </button>
+    {% if county or trade or available %}
+    <a
+      href="{% url 'freelancer_list' %}"
+      class="text-sm text-gray-400 hover:text-white flex items-center px-3 py-2 transition"
+    >
+      Clear filters
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Results count -->
+  <p class="text-sm text-gray-500 mb-5">
+    {{ freelancers.count }} freelancer{{ freelancers.count|pluralize }} found
+  </p>
+
+  <!-- Grid -->
+  {% if freelancers %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for freelancer in freelancers %}
+    <a
+      href="{% url 'profile_view' freelancer.username %}"
+      class="group bg-gray-800/60 border border-gray-700 hover:border-teal-600 rounded-2xl p-5 flex flex-col gap-4 transition"
+    >
+      <!-- Top row: avatar + name + availability -->
+      <div class="flex items-start gap-4">
+        {% if freelancer.profile.avatar %}
+        <img
+          src="{{ freelancer.profile.avatar.url }}"
+          alt="{{ freelancer.username }}"
+          class="w-14 h-14 rounded-full object-cover flex-shrink-0 border border-gray-600"
+        />
+        {% else %}
+        <div class="w-14 h-14 rounded-full bg-teal-800/50 flex items-center justify-center flex-shrink-0 border border-teal-700/40">
+          <span class="text-teal-300 text-xl font-bold">
+            {{ freelancer.username|first|upper }}
+          </span>
+        </div>
+        {% endif %}
+
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-white font-semibold truncate group-hover:text-teal-300 transition">
+              {{ freelancer.get_full_name|default:freelancer.username }}
+            </h2>
+            {% if freelancer.profile.is_available %}
+            <span class="text-xs bg-teal-900/60 text-teal-400 border border-teal-700/40 px-2 py-0.5 rounded-full flex-shrink-0">
+              Available
+            </span>
+            {% else %}
+            <span class="text-xs bg-gray-700/60 text-gray-400 border border-gray-600/40 px-2 py-0.5 rounded-full flex-shrink-0">
+              Busy
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Trade + County -->
+          <div class="flex items-center gap-2 mt-1 flex-wrap">
+            {% if freelancer.profile.trade %}
+            <span class="text-sm text-teal-400">{{ freelancer.profile.trade }}</span>
+            {% endif %}
+            {% if freelancer.profile.county %}
+            <span class="text-gray-600 text-xs">·</span>
+            <span class="text-sm text-gray-400">{{ freelancer.profile.county }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Bio -->
+      {% if freelancer.profile.bio %}
+      <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">
+        {{ freelancer.profile.bio }}
+      </p>
+      {% endif %}
+
+      <!-- Bottom row: rating + rate + experience -->
+      <div class="flex items-center justify-between pt-2 border-t border-gray-700/50 flex-wrap gap-2">
+        <div class="flex items-center gap-1">
+          {% if freelancer.avg_rating %}
+            <span class="text-yellow-400 text-sm">★</span>
+            <span class="text-white text-sm font-medium">{{ freelancer.avg_rating|floatformat:1 }}</span>
+            <span class="text-gray-500 text-xs">({{ freelancer.total_reviews }})</span>
+          {% else %}
+            <span class="text-gray-500 text-xs">No reviews yet</span>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center gap-3 text-sm">
+          {% if freelancer.profile.years_experience %}
+          <span class="text-gray-400">{{ freelancer.profile.years_experience }} yr{{ freelancer.profile.years_experience|pluralize }}</span>
+          {% endif %}
+          {% if freelancer.profile.hourly_rate %}
+          <span class="text-teal-300 font-semibold">€{{ freelancer.profile.hourly_rate }}/hr</span>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="text-center py-20">
+    <div class="text-5xl mb-4">🔍</div>
+    <h3 class="text-white text-lg font-semibold mb-2">No freelancers found</h3>
+    <p class="text-gray-400 text-sm">
+      {% if county or trade %}
+        Try adjusting your filters or
+        <a href="{% url 'freelancer_list' %}" class="text-teal-400 hover:underline">browse all freelancers</a>.
+      {% else %}
+        No freelancers have signed up yet. Check back soon.
+      {% endif %}
+    </p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
