@@ -64,16 +64,12 @@
 
           <div>
             <label class="block text-gray-400 text-sm mb-1">County</label>
-            <select name="county" class="input-dark">
-              <option value="">Select county...</option>
-              {% with counties="Carlow,Dublin,Kildare,Kilkenny,Laois,Longford,Louth,Meath,Offaly,Westmeath,Wexford,Wicklow,Clare,Cork,Kerry,Limerick,Tipperary,Waterford,Galway,Leitrim,Mayo,Roscommon,Sligo,Cavan,Donegal,Monaghan" %}
-              {% for c in counties.split(",") %}
-                <option value="{{ c }}" {% if form.instance.county == c %}selected{% endif %}>{{ c }}</option>
-              {% endfor %}
-              {% endwith %}
-            </select>
-          </div>
-
+           <select name="county" class="input-dark">
+  <option value="">Select county...</option>
+  {% for c in county_choices %}
+    <option value="{{ c }}" {% if form.instance.county == c %}selected{% endif %}>{{ c }}</option>
+  {% endfor %}
+</select>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-gray-400 text-sm mb-1">Hourly Rate (€)</label>

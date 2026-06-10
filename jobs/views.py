@@ -329,6 +329,12 @@ def send_message(request, job_id):
             "user": request.user
         })
 
+COUNTIES = [
+    'Carlow','Dublin','Kildare','Kilkenny','Laois','Longford','Louth','Meath',
+    'Offaly','Westmeath','Wexford','Wicklow','Clare','Cork','Kerry','Limerick',
+    'Tipperary','Waterford','Galway','Leitrim','Mayo','Roscommon','Sligo',
+    'Cavan','Donegal','Monaghan',
+]
 
 @login_required
 def profile_edit(request):
@@ -340,7 +346,10 @@ def profile_edit(request):
             return redirect('profile_view', username=request.user.username)
     else:
         form = ProfileEditForm(instance=profile, user=request.user)
-    return render(request, 'jobs/profile_edit.html', {'form': form})
+    return render(request, 'jobs/profile_edit.html', {
+        'form': form,
+        'county_choices': COUNTIES,
+    })
 
 @login_required
 def job_create(request):
