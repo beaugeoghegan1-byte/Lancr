@@ -1,2 +1,1 @@
-web: python -m gunicorn myproject.wsgi --log-file -
-# force redeploy
+web: DJANGO_SETTINGS_MODULE=myproject.settings python -m gunicorn myproject.wsgi --log-file -
