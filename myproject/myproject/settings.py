@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
 import os
+
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,6 +78,7 @@ DATABASES = {
         conn_max_age=600
     )
 }
+print("DATABASE_URL =", os.environ.get('DATABASE_URL', 'NOT FOUND'))
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
