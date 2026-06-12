@@ -74,12 +74,12 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-       default=os.environ.get('DATABASE_URL'),
+       default=os.environ.get('PG_URL'),
         conn_max_age=600
     )
 }
 print("SETTINGS FILE: myproject/myproject/settings.py")
-print("DATABASE_URL =", os.environ.get('DATABASE_URL', 'NOT FOUND'))
+print("PG_URL =", os.environ.get('PG_URL', 'NOT FOUND'))
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
