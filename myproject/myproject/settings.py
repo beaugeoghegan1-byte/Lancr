@@ -78,6 +78,7 @@ DATABASES = {
         conn_max_age=600
     )
 }
+print("SETTINGS FILE: myproject/myproject/settings.py")
 print("DATABASE_URL =", os.environ.get('DATABASE_URL', 'NOT FOUND'))
 
 AUTH_PASSWORD_VALIDATORS = [
