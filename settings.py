@@ -105,7 +105,7 @@ DATABASES = {
     )
 }
 print("SETTINGS FILE: myproject/myproject/settings.py")
-print("PG_URL =", os.environ.get('PG_URL', 'NOT FOUND'))
+print("DATABASE_URL=", os.environ.get('DATABASE_URL', 'NOT FOUND'))
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
