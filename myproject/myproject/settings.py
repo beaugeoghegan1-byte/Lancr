@@ -20,7 +20,7 @@ AUTH_USER_MODEL = 'accounts.User'
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-d21k(luuvqwtli&)f3zi-*p7*w07_omgzn=)q8n-!odh_tb)yd')
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -78,8 +78,7 @@ DATABASES = {
         conn_max_age=600
     )
 }
-print("SETTINGS FILE: myproject/myproject/settings.py")
-print("DATABASE_URL =", os.environ.get('DATABASE_URL', 'NOT FOUND'))
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
